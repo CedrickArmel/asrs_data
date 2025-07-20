@@ -1,0 +1,98 @@
+{
+    "Aircraft Equipment": [
+        "Critical",
+        "Less Severe"
+    ],
+    "Airspace Violation": [
+        "All Types"
+    ],
+    "ATC Issues": [
+        "All Types"
+    ],
+    "Flight Deck/Cabin/Aircraft Event": [
+        "Illness / Injury",
+        "Passenger Electronic Device",
+        "Passenger Misconduct",
+        "Smoke / Fire / Fumes / Odor",
+        "Other / Unknown"
+    ],
+    "Conflict": [
+        "NMAC",
+        "Airborne Conflict",
+        "Ground Conflict, Critical",
+        "Ground Conflict, Less Severe"
+    ],
+    "Deviation - Altitude": [
+        "Crossing Restriction Not Met",
+        "Excursion from Assigned Altitude",
+        "Overshoot",
+        "Undershoot"
+    ],
+    "Deviation - Speed": [
+        "All Types"
+    ],
+    "Deviation - Track/Heading": [
+        "All Types"
+    ],
+    "Deviation / Discrepancy - Procedural": [
+        "Clearance",
+        "FAR",
+        "Hazardous Material Violation",
+        "Landing without Clearance",
+        "Maintenance",
+        "MEL / CDL",
+        "Published Material/Policy",
+        "Security",
+        "Unauthorized Flight Operations (UAS)",
+        "Weight and Balance",
+        "Other / Unknown"
+    ],
+    "Ground Excursion": [
+        "Ramp",
+        "Runway",
+        "Taxiway"
+    ],
+    "Ground Incursion": [
+        "Ramp",
+        "Runway",
+        "Taxiway"
+    ],
+    "Ground Event/Encounter": [
+        "Aircraft",
+        "FOD",
+        "Fuel Issue",
+        "Gear Up Landing",
+        "Ground Equipment Issue",
+        "Ground Strike – Aircraft",
+        "Jet Blast",
+        "Loss of Aircraft Control",
+        "Loss of VLOS (UAS)",
+        "Object",
+        "Person / Animal / Bird",
+        "Vehicle",
+        "Weather / Turbulence",
+        "Other / Unknown"
+    ],
+    "Inflight Event/Encounter": [
+        "Aircraft",
+        "CFTT/CFIT",
+        "Fly Away (UAS)",
+        "Fuel Issue",
+        "Laser",
+        "Loss of Aircraft Control",
+        "Object",
+        "Bird / Animal",
+        "Unstabilized Approach",
+        "VFR in IMC",
+        "Wake Vortex Encounter",
+        "Weather / Turbulence",
+        "Other / Unknown"
+    ],
+    "No Specific Anomaly Occurred": [
+        "All Types",
+        "Unwanted Situation"
+    ],
+    "Other": [
+        "Write-in"
+    ]
+}

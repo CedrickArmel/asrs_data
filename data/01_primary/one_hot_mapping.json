@@ -1,0 +1,16 @@
+{
+    "ATC Issue": 0,
+    "Aircraft Equipment": 1,
+    "Airspace Violation": 2,
+    "Conflict": 3,
+    "Deviation - Altitude": 4,
+    "Deviation - Speed": 5,
+    "Deviation - Track/Heading": 6,
+    "Deviation/Discrepancy - Procedural": 7,
+    "Flight Deck/Cabin/Aircraft Event": 8,
+    "Ground Event/Encounter": 9,
+    "Ground Excursion": 10,
+    "Ground Incursion": 11,
+    "Inflight Event/Encounter": 12,
+    "No Specific Anomaly Occurred": 13
+}

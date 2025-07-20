@@ -2,7 +2,6 @@
 logs/*
 conf/local/*
 data/*
-!data/01_primary/
 outputs/
 .vscode/
 notebooks/local*
