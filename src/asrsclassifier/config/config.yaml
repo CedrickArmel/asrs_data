@@ -1,0 +1,262 @@
+# Aliases
+fold: 0
+task: "multilabel"
+encoder_name: "NASA-AIML/MIKA_SafeAeroBERT"
+max_len: 512
+num_classes: null
+num_labels: 14
+lr: 1e-5
+momentum: 0.9
+nesterov: true
+weight_decay: 0
+t0: 64
+tmax: 200
+tmult: 2
+schedule: cosine_wr
+batch_size: 25
+num_workers: 10
+monitor: score
+persistent_workers: true
+prefetch_factor: 64
+every_n_epochs: 1
+eta_min: 5e-6
+warmup: 200
+gradient_clip_val: 10
+precision: 16-true
+accelerator: auto
+strategy: auto
+fast_dev_run: false
+max_epochs: 2
+val_check_interval: 25 # default: null
+check_val_epoch: 2
+profiler_name: torch
+ckpt_path: null
+save_dir: null
+wandb_run_name: null
+fit_data: data/03_final/final_safran_asrs_14label_fit_10fold_seed_4294967295.parquet
+test_data: data/03_final/final_safran_asrs_14label_test.parquet
+mapper_path: data/01_primary/one_hot_mapping.json
+decoder_path: data/01_primary/abs_decoder_domain_specific.json
+zone: "UTC"
+
+# Data Management
+data:
+  fit:
+    mode: fit
+    path: "${path: ${fit_data}}"
+    fold: "${fold}"
+  test:
+    mode: test
+    path: "${path: ${test_data}}"
+  decoders:
+    mapper_path: "${path: ${mapper_path}}"
+    decoder_path: "${path: ${decoder_path}}"
+  dataset:
+    decode: false
+    stopwords: true
+    max_len: "${max_len}"
+
+# DataLoaders
+loader:
+  train:
+    batch_size: "${batch_size}"
+    num_workers: "${num_workers}"
+    shuffle: true
+    drop_last: true
+    persistent_workers: "${persistent_workers}"
+    prefetch_factor: "${prefetch_factor}"
+    pin_memory: false
+  eval:
+    batch_size: 50
+    num_workers: 2
+    shuffle: false
+    drop_last: true
+    persistent_workers: false
+    prefetch_factor: 32
+    pin_memory: false
+
+# Metrics
+metrics:
+  f1_score:
+    super:
+      compute_on_cpu: true
+      dist_sync_on_step: false
+      dist_sync_fn: null
+      distributed_available_fn: null
+      sync_on_compute: true
+      compute_with_cache: true
+    init:
+      task: "${task}"
+      num_classes: "${num_classes}"
+      num_labels: "${num_labels}"
+      average: "none"
+      multidim_average: "global"
+      top_k: 1
+      ignore_index: null
+      validate_args: true
+      zero_division: 1.0
+
+# Callbacks
+callbacks:
+  checkpoint:
+    filename: "{epoch}-{step}-{train_loss:.2e}-{val_loss:.2e}-{score:.2e}"
+    monitor: "${monitor}"
+    verbose: false
+    save_last: false
+    save_top_k: 1
+    mode: max
+    auto_insert_metric_name: true
+    save_weights_only: false
+    every_n_train_steps: 25  # x to deactivate
+    train_time_interval: null
+    every_n_epochs: "${eval: ${every_n_epochs} if not ${callbacks.checkpoint.every_n_train_steps} and not ${callbacks.checkpoint.train_time_interval} else None}"
+    save_on_train_epoch_end: false
+    enable_version_counter: false
+  lr_monitor:
+    logging_interval: step
+    log_momentum: true
+    log_weight_decay: true
+
+loggers:
+  name: "wandb"
+  enable_logging: "${trainers.callable.logger}"
+  wandb:
+    entity: yebouetc
+    project: asrsclassifier
+    group:  "${wandbgroup: ${encoder_name}}"
+    tags: ["fold${fold}"]
+  tensorboard:
+    save_dir: "${path: ${root_dir}}"
+    name: "${wandbgroup: ${encoder_name}}-fold${fold}"
+    max_queue: 100
+    flush_secs: 10
+
+# Model
+models:
+  encoder_name: "${encoder_name}"
+  num_labels: "${num_labels}"
+
+# reproductibility
+determinism:
+  seed: 4294967295
+  cudnn_backend: false
+  use_deterministic_algorithms: false
+  warn_only: true
+
+# Training
+training:
+  supervision:
+    trainable_layers: {"classifier": null, "bert.encoder.layer": [10, 11]}
+  ckpt_path: "${ckpt_path}"
+
+# Optimizers
+optimizer:
+  name: AdamW
+  sgd:
+    lr: "${lr}"
+    momentum: "${momentum}"
+    nesterov: "${nesterov}"
+    weight_decay: "${weight_decay}"
+  adam:
+    lr: "${lr}"
+    weight_decay: "${weight_decay}"
+  adamw:
+    lr: "${lr}"
+    weight_decay: "${weight_decay}"
+  adamw_plus:
+    lr: "${lr}"
+    weight_decay: "${weight_decay}"
+
+# Optmization
+focal_loss:
+    include_background: true
+    to_onehot_y: false
+    gamma: 2.
+    alpha: null
+    weight: [4, 2, 13, 3, 7, 22, 7, 1, 8, 8, 28, 11, 3, 124]
+    reduction: mean
+    use_softmax: false
+
+w_init:
+  dist: normal
+  a: 0.1
+  mode: fan_out
+  nonlinearity: leaky_relu
+
+# Profiler
+profiler:
+  accelerator: "${profiler_name}"
+  xla:
+    port: 9001
+  torch:
+    emit_nvtx: true
+    prof_filename: prof_filename.txt
+
+# Scheduler
+scheduler:
+  name: "${schedule}"
+  warmup: "${warmup}"
+  restart_scheduler: true
+  multistep:
+    milestones: 2
+    gamma: "${eta_min}"
+  cosine:
+    T_max: "${tmax}"
+    eta_min: "${eta_min}"
+    last_epoch: -1
+  cosine_wr:
+    T_0: "${t0}"
+    T_mult: "${tmult}"
+    eta_min: "${eta_min}"
+    last_epoch: -1
+  linear:
+    start_factor: "${eta_min}"
+    end_factor: 1.0
+    total_iters: "${warmup}"
+
+# Trainer
+trainers:
+  callable:
+    logger: "${eval: not ${trainers.lightning.barebones} and not ${trainers.lightning.fast_dev_run}}"
+    callbacks: "${eval: True if not ${trainers.lightning.barebones} and not ${trainers.lightning.fast_dev_run} else None}"
+    profiler: "${eval: None if not ${trainers.lightning.barebones} and not ${trainers.lightning.fast_dev_run} else None}"
+  lightning:
+    accumulate_grad_batches: 1
+    gradient_clip_algorithm: norm
+    gradient_clip_val: "${gradient_clip_val}"
+    precision: "${precision}"
+    sync_batchnorm: true
+    accelerator: "${accelerator}"
+    devices: auto
+    num_nodes: 1
+    strategy: "${strategy}"
+    use_distributed_sampler: true
+    reload_dataloaders_every_n_epochs: 0
+    benchmark: null
+    barebones: false
+    detect_anomaly: false
+    fast_dev_run: "${fast_dev_run}"
+    num_sanity_val_steps: 0
+    overfit_batches: 0
+    plugins: null
+    default_root_dir: "${path: ${root_dir}}"
+    enable_checkpointing: true
+    enable_model_summary: false
+    enable_progress_bar: true
+    log_every_n_steps: 2
+    model_registry: null
+    check_val_every_n_epoch: "${eval: ${check_val_epoch} if not ${trainers.lightning.val_check_interval} else None}"
+    inference_mode: true
+    limit_predict_batches: 1.0
+    limit_test_batches: 1.0
+    limit_train_batches: 1.0
+    limit_val_batches: 1.0
+    max_epochs: "${max_epochs}"
+    min_epochs: null
+    max_steps: -1
+    max_time: null
+    min_steps: null
+    val_check_interval: "${val_check_interval}"
+    deterministic: "warn"
+
+root_dir: "logs/seed_${determinism.seed}"
