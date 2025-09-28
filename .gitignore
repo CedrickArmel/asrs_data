@@ -4,7 +4,9 @@ conf/local/*
 data/*
 outputs/
 .vscode/
+wandb
 notebooks/local*
+*=*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

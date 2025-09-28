@@ -1,19 +1,29 @@
 [project]
-name = "asrs-data"
-version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
-requires-python = ">=3.10"
 dependencies = [
     "pandas>=2.3.0",
     "pyarrow>=20.0.0",
-    "scikit-learn>=1.7.0",
+    "hydra-core>=1.3.2",
+    "lightning==2.5.1.post0",
     "spacy>=3.8.7",
-    "tiktoken>=0.9.0",
-    "torch>=2.7.1",
+    "en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl",
+    "torch~=2.6.0",
     "tqdm>=4.67.1",
     "transformers>=4.53.2",
+    "torchmetrics>=1.7.4",
+    "pip>=25.1.1",
+    "torchinfo>=1.8.0",
+    "python-dotenv>=1.1.1",
+    "wonderwords>=2.2.0",
+    "wandb>=0.21.0",
+    "numpy>=1.26.4",
+    "tensorboardx>=2.6.4",
+    "tensorboard>=2.20.0",
 ]
+name = "asrsclassifier"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10,<3.11"
 
 [dependency-groups]
 dev = [
@@ -29,8 +39,11 @@ dev = [
     "mypy>=1.17.0",
     "pre-commit>=4.2.0",
     "pytest>=8.4.1",
+    "scikit-learn>=1.7.0",
     "seaborn>=0.13.2",
+    "tiktoken>=0.9.0",
 ]
+xla = ["libtpu==0.0.7.1", "torch-xla~=2.6.0"]
 
 [tool.pylint.messages-control]
 disable = []
@@ -38,8 +51,18 @@ disable = []
 [tool.black]
 line-length = 88
 
-[tool.hatch.build]
-packages = ["src/asrsclassifier"]
-
 [tool.isort]
 profile = "black"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["asrsclassifier"]
+
+[[tool.uv.index]]
+name = "libtpu-wheels"
+url = "https://storage.googleapis.com/libtpu-wheels/index.html"
+explicit = true
+format = "flat"
+
+[tool.uv.sources]
+libtpu = { index = "libtpu-wheels" }
