@@ -29,13 +29,13 @@ import os
 
 import hydra
 import spacy
+import wandb
 from dotenv import load_dotenv
 from lightning.pytorch.callbacks import ModelSummary
 from lightning.pytorch.loggers import TensorBoardLogger
 from omegaconf import DictConfig, OmegaConf
 from transformers import AutoTokenizer
 
-import wandb
 from asrsclassifier.config import path, wandbgroup
 from asrsclassifier.data import ClsfierDataset, get_data, get_decoders
 from asrsclassifier.models import ASRSClassifier

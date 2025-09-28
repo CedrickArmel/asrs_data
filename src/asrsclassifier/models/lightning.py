@@ -25,12 +25,12 @@ from typing import Any
 
 import lightning.pytorch as L
 import torch
+import wandb
 from lightning.pytorch.loggers.utilities import _scan_checkpoints
 from omegaconf import DictConfig
 from torch.optim import Optimizer
 from torch.optim.lr_scheduler import LRScheduler
 
-import wandb
 from asrsclassifier.losses import FocalLoss
 from asrsclassifier.metrics import F1Sscore
 from asrsclassifier.utils import get_optimizer, get_scheduler
