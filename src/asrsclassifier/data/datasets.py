@@ -38,7 +38,7 @@ class ClsfierDataset(Dataset):
         max_len: "int",
         decoder: "dict[str, str]",
         lang: "spacy.Language",
-        mapping: "dict[str, int]",
+        mapper: "dict[str, int]",
         decode: "bool" = True,
         stopwords: "bool" = False,
     ) -> None:
@@ -46,7 +46,7 @@ class ClsfierDataset(Dataset):
         self.tokenizer = tokenizer
         self.decoder = decoder
         self.lang = lang
-        self.mapping = mapping
+        self.mapper = mapper
         self.decode = decode
         self.stopwords = stopwords
         self.max_len = max_len
@@ -68,11 +68,7 @@ class ClsfierDataset(Dataset):
             return_token_type_ids=True,
         )
         item = {
-            "input": dict(
-                ids=torch.tensor(tokens["input_ids"], dtype=torch.long),
-                mask=torch.tensor(tokens["attention_mask"], dtype=torch.long),
-                token_type_ids=torch.tensor(tokens["token_type_ids"], dtype=torch.long),
-            ),
+            "input": {k: torch.tensor(v, dtype=torch.long) for k, v in tokens.items()},
             "target": torch.tensor(target, dtype=torch.float),
         }
         return item
@@ -111,10 +107,10 @@ class ClsfierDataset(Dataset):
         return text
 
     def _one_hot(self, text: "str"):
-        num_labels = [0] * len(self.mapping)
+        num_labels = [0] * len(self.mapper)
         labels = [label.strip().replace(" / ", "/") for label in text.split(";")]
         for label in labels:
-            num_labels[self.mapping[label]] = 1
+            num_labels[self.mapper[label]] = 1
         return num_labels
 
     def _remove_stopwords(self, text: "str"):

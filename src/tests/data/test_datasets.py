@@ -49,10 +49,10 @@ def decoder():
 
 
 @pytest.fixture
-def mapping():
+def mapper():
     with open("data/01_primary/one_hot_mapping.json", "r") as f:
-        mapping = json.load(f)
-    return mapping
+        mapper = json.load(f)
+    return mapper
 
 
 @pytest.fixture
@@ -65,30 +65,32 @@ def nlp():
     return spacy.blank("en")
 
 
-def test_len(test_data, tokenizer, decoder, mapping, nlp):
+def test_len(test_data, tokenizer, decoder, mapper, nlp):
     dataset = ClsfierDataset(
-        tokenizer, test_data, max_len=16, decoder=decoder, lang=nlp, mapping=mapping
+        tokenizer, test_data, max_len=16, decoder=decoder, lang=nlp, mapper=mapper
     )
     assert len(dataset) == 2
 
 
-def test_getitem(test_data, tokenizer, decoder, mapping, nlp):
+def test_getitem(test_data, tokenizer, decoder, mapper, nlp):
     dataset = ClsfierDataset(
-        tokenizer, test_data, max_len=512, decoder=decoder, lang=nlp, mapping=mapping
+        tokenizer, test_data, max_len=512, decoder=decoder, lang=nlp, mapper=mapper
     )
     item = dataset[0]
     assert set(item.keys()) == set(["input", "target"])
-    assert set(item["input"].keys()) == set(["ids", "mask", "token_type_ids"])
-    assert isinstance(item["input"]["ids"], torch.Tensor)
-    assert isinstance(item["input"]["mask"], torch.Tensor)
+    assert set(item["input"].keys()) == set(
+        ["input_ids", "attention_mask", "token_type_ids"]
+    )
+    assert isinstance(item["input"]["input_ids"], torch.Tensor)
+    assert isinstance(item["input"]["attention_mask"], torch.Tensor)
     assert isinstance(item["input"]["token_type_ids"], torch.Tensor)
-    assert item["input"]["ids"].shape[0] == 512
-    assert item["target"].shape[0] == len(mapping)
+    assert item["input"]["input_ids"].shape[0] == 512
+    assert item["target"].shape[0] == len(mapper)
 
 
-def test_decode_abs(test_data, tokenizer, decoder, mapping, nlp):
+def test_decode_abs(test_data, tokenizer, decoder, mapper, nlp):
     dataset = ClsfierDataset(
-        tokenizer, test_data, max_len=16, decoder=decoder, lang=nlp, mapping=mapping
+        tokenizer, test_data, max_len=16, decoder=decoder, lang=nlp, mapper=mapper
     )
     text = test_data[0]["narrative"]
     decoded = dataset._decode_abs(text=text)
@@ -102,11 +104,11 @@ def test_decode_abs(test_data, tokenizer, decoder, mapping, nlp):
     )
 
 
-def test_clean_punc(test_data, tokenizer, decoder, mapping, nlp):
+def test_clean_punc(test_data, tokenizer, decoder, mapper, nlp):
     from asrsclassifier.data.datasets import ClsfierDataset
 
     dataset = ClsfierDataset(
-        tokenizer, test_data, max_len=16, decoder=decoder, lang=nlp, mapping=mapping
+        tokenizer, test_data, max_len=16, decoder=decoder, lang=nlp, mapper=mapper
     )
     text = test_data[0]["narrative"]
     cleaned = dataset._clean_punc(text=text)
@@ -116,11 +118,11 @@ def test_clean_punc(test_data, tokenizer, decoder, mapping, nlp):
     )
 
 
-def test_one_hot(test_data, tokenizer, decoder, mapping, nlp):
+def test_one_hot(test_data, tokenizer, decoder, mapper, nlp):
     from asrsclassifier.data.datasets import ClsfierDataset
 
     dataset = ClsfierDataset(
-        tokenizer, test_data, max_len=16, decoder=decoder, lang=nlp, mapping=mapping
+        tokenizer, test_data, max_len=16, decoder=decoder, lang=nlp, mapper=mapper
     )
     text1 = test_data[0]["anomaly"]
     target1 = dataset._one_hot(text1)
