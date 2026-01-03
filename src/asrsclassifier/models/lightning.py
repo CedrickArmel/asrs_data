@@ -19,7 +19,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
+import os
 from pathlib import Path
 from typing import Any
 
@@ -29,6 +29,7 @@ from lightning.pytorch.loggers.utilities import _scan_checkpoints
 from omegaconf import DictConfig
 from torch.optim import Optimizer
 from torch.optim.lr_scheduler import LRScheduler
+from torchmetrics.utilities import dim_zero_cat
 
 import wandb
 from asrsclassifier.losses import FocalLoss
@@ -99,15 +100,15 @@ class ASRSClassifier(L.LightningModule):
         #     self.run = wandb.run
         # self._logged_model_time: "dict[str, float]" = {}
         # self._checkpoint_name: "str | None" = None
-        self.trainable_layers = self.cfg.training.supervision.trainable_layers
-        stepping_batches = self.trainer.estimated_stepping_batches
-        max_epochs = self.cfg.trainers.lightning.max_epochs
-        world_size = self.trainer.world_size
-
-        self.cfg.lr *= self.trainer.world_size
-        self.training_steps = stepping_batches * max_epochs * world_size
-
         if stage == "fit":
+            self.trainable_layers = self.cfg.training.supervision.trainable_layers
+            stepping_batches = self.trainer.estimated_stepping_batches
+            max_epochs = self.cfg.trainers.lightning.max_epochs
+            world_size = self.trainer.world_size
+
+            self.cfg.lr *= self.trainer.world_size
+            self.training_steps = stepping_batches * max_epochs * world_size
+
             if self.trainable_layers is not None:
                 self.backbone.apply(
                     lambda layer: self._set_layer_trainable(
@@ -151,13 +152,17 @@ class ASRSClassifier(L.LightningModule):
         )
         return loss
 
+    def _shared_eval_step(self, batch: "dict[str, Any]"):
+        output_dict = self(batch)
+        loss: "torch.Tensor" = output_dict["loss"]
+        logits = output_dict["logits"]
+        return loss, logits
+
     def validation_step(
         self, batch: "dict[str, Any]", batch_idx: "int"
     ) -> "torch.Tensor":
         """Operates on a single batch of data from the validation set"""
-        output_dict = self(batch)
-        loss: "torch.Tensor" = output_dict["loss"]
-        logits = output_dict["logits"]
+        loss, logits = self._shared_eval_step(batch)
         self.metric.update(logits.sigmoid(), batch["target"])
         self.log(
             "val_loss",
@@ -168,10 +173,36 @@ class ASRSClassifier(L.LightningModule):
             prog_bar=True,
             sync_dist=True,
         )
-        return logits
+        return logits.sigmoid()
+
+    def test_step(self, batch: "dict[str, Any]", batch_idx: "int"):
+        loss, logits = self._shared_eval_step(batch)
+        self.output.append(
+            torch.cat(
+                [batch["acn"].cpu(), logits.sigmoid().cpu(), batch["target"].cpu()],
+                axis=1,
+            )
+        )
+        self.log(
+            "test_loss",
+            loss,
+            on_step=False,
+            on_epoch=True,
+            logger=True,
+            prog_bar=True,
+            sync_dist=True,
+        )
+        return logits.sigmoid()
 
     def on_fit_start(self) -> "None":
         """Called at the very beginning of fit."""
+        self._shared_start()
+
+    def on_test_start(self):
+        self.output = []
+        self._shared_start()
+
+    def _shared_start(self):
         if torch.distributed.is_initialized():
             if not hasattr(self, "gloo_group"):
                 self.gloo_groupg = torch.distributed.new_group(backend="gloo")
@@ -224,6 +255,15 @@ class ASRSClassifier(L.LightningModule):
             sync_dist=True,
         )
         self.metric.reset()
+
+    def on_test_epoch_end(self):
+        output: "torch.Tensor" = dim_zero_cat(x=self.output)
+        torch.save(
+            output,
+            os.path.join(
+                self.trainer.log_dir, f"preds-rank{self.trainer.global_rank}.pt"
+            ),
+        )
 
     def configure_gradient_clipping(
         self,

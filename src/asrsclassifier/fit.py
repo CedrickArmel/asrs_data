@@ -28,22 +28,19 @@
 import os
 
 import hydra
-import spacy
 from dotenv import load_dotenv
 from lightning.pytorch.callbacks import ModelSummary
 from lightning.pytorch.loggers import TensorBoardLogger
 from omegaconf import DictConfig, OmegaConf
-from transformers import AutoTokenizer
 
 import wandb
 from asrsclassifier.config import path, wandbgroup
-from asrsclassifier.data import ClsfierDataset, get_data, get_decoders
+from asrsclassifier.data import load_data
 from asrsclassifier.models import ASRSClassifier
 from asrsclassifier.trainers import get_lightning_trainer
 from asrsclassifier.utils import (
     flatten_dict,
     get_callbacks,
-    get_data_loader,
     get_profiler,
     set_seed,
 )
@@ -53,41 +50,15 @@ OmegaConf.register_new_resolver("wandbgroup", resolver=wandbgroup, replace=True)
 OmegaConf.register_new_resolver("path", resolver=path, replace=True)
 
 
+# TODO: make the fit function to retrieve the correct version to resume on.
 @hydra.main(version_base=None, config_path="./config", config_name="config")
-def train(cfg: "DictConfig") -> "None":
+def fit(cfg: "DictConfig") -> "None":
 
     load_dotenv()
 
     set_seed(**cfg.determinism)
 
-    mapper, decoder = get_decoders(**cfg.data.decoders)
-    tokenizer = AutoTokenizer.from_pretrained(cfg.models.encoder_name, use_fast=True)
-    nlp = spacy.load("en_core_web_sm")
-    train_data, val_data = get_data(**cfg.data.fit)
-
-    train_ds = ClsfierDataset(
-        data=train_data,
-        tokenizer=tokenizer,
-        mapper=mapper,
-        decoder=decoder,
-        lang=nlp,
-        **cfg.data.dataset,
-    )
-    val_ds = ClsfierDataset(
-        data=val_data,
-        tokenizer=tokenizer,
-        mapper=mapper,
-        decoder=decoder,
-        lang=nlp,
-        **cfg.data.dataset,
-    )
-
-    train_loader = get_data_loader(
-        dataset=train_ds, seed=cfg.determinism.seed, **cfg.loader.train
-    )
-    val_loader = get_data_loader(
-        dataset=val_ds, seed=cfg.determinism.seed, **cfg.loader.eval
-    )
+    train_loader, val_loader = load_data(cfg)
 
     run_config = flatten_dict(OmegaConf.to_container(cfg, resolve=True), sep="-")
     os.makedirs(cfg.trainers.lightning.default_root_dir, exist_ok=True)
@@ -111,16 +82,27 @@ def train(cfg: "DictConfig") -> "None":
     )
 
     try:
-        trainer.fit(
-            model,
-            train_dataloaders=train_loader,
-            val_dataloaders=val_loader,
-            ckpt_path=cfg.training.ckpt_path,
-        )
+        if cfg.training_mode == "kfold":
+            trainer.fit(
+                model=model,
+                train_dataloaders=train_loader,
+                val_dataloaders=val_loader,
+                ckpt_path=cfg.training.ckpt_path,
+            )
+            trainer.test(model=model, dataloaders=val_loader, ckpt_path="best")
+
+        elif cfg.training_mode == "fit":
+            trainer.fit(
+                model=model,
+                train_dataloaders=train_loader,
+                ckpt_path=cfg.training.ckpt_path,
+            )
+            if val_loader:
+                trainer.test(model=model, dataloaders=val_loader, ckpt_path="last")
         wandb.finish()
     finally:
         wandb.finish()
 
 
 if __name__ == "__main__":
-    train()
+    fit()

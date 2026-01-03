@@ -232,6 +232,7 @@ def softmax_focal_loss(
     loss: "torch.Tensor" = -(1 - input_ls.exp()).pow(gamma) * input_ls * target
 
     if alpha is not None:
+        loss *= alpha
         # (1-alpha) for the background class and alpha for the other classes
         alpha_fac: "torch.Tenosr" = torch.tensor(
             [1 - alpha] + [alpha] * (target.shape[1] - 1)

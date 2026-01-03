@@ -1,3 +1,5 @@
+# TODO: Se if i can implement structured config/config groups to streamline config in cli.
+
 # Aliases
 fold: 0
 task: "multilabel"
@@ -12,6 +14,7 @@ weight_decay: 0
 t0: 64
 tmax: 200
 tmult: 2
+optimizer_name: AdamW
 schedule: cosine_wr
 batch_size: 25
 num_workers: 10
@@ -27,31 +30,30 @@ accelerator: auto
 strategy: auto
 fast_dev_run: false
 max_epochs: 2
-val_check_interval: 25 # default: null
+val_check_interval: 100 # default: null
 check_val_epoch: 2
 profiler_name: torch
 ckpt_path: null
 save_dir: null
 wandb_run_name: null
-fit_data: data/03_final/final_safran_asrs_14label_fit_10fold_seed_4294967295.parquet
-test_data: data/03_final/final_safran_asrs_14label_test.parquet
+fit_data: data/03_final/final_safran_asrs_14label_fit_10fold_seed_4294967295_v2.parquet # test: data/03_final/final_safran_asrs_14label_test.parquet
+val_data: null
+training_mode: "kfold"
 mapper_path: data/01_primary/one_hot_mapping.json
 decoder_path: data/01_primary/abs_decoder_domain_specific.json
 zone: "UTC"
 
 # Data Management
 data:
-  fit:
-    mode: fit
+  datasets:
     path: "${path: ${fit_data}}"
+    val_path: "${path: ${val_data}}"
+    mode: "${training_mode}"
     fold: "${fold}"
-  test:
-    mode: test
-    path: "${path: ${test_data}}"
   decoders:
     mapper_path: "${path: ${mapper_path}}"
     decoder_path: "${path: ${decoder_path}}"
-  dataset:
+  params:
     decode: false
     stopwords: true
     max_len: "${max_len}"
@@ -102,12 +104,12 @@ callbacks:
     filename: "{epoch}-{step}-{train_loss:.2e}-{val_loss:.2e}-{score:.2e}"
     monitor: "${monitor}"
     verbose: false
-    save_last: false
+    save_last: true
     save_top_k: 1
     mode: max
     auto_insert_metric_name: true
     save_weights_only: false
-    every_n_train_steps: 25  # x to deactivate
+    every_n_train_steps: 100  # x to deactivate
     train_time_interval: null
     every_n_epochs: "${eval: ${every_n_epochs} if not ${callbacks.checkpoint.every_n_train_steps} and not ${callbacks.checkpoint.train_time_interval} else None}"
     save_on_train_epoch_end: false
@@ -124,7 +126,7 @@ loggers:
     entity: yebouetc
     project: asrsclassifier
     group:  "${wandbgroup: ${encoder_name}}"
-    tags: ["fold${fold}"]
+    tags: ["fold${fold}", "${optimizer_name}", "${training_mode}"]
   tensorboard:
     save_dir: "${path: ${root_dir}}"
     name: "${wandbgroup: ${encoder_name}}-fold${fold}"
@@ -151,7 +153,7 @@ training:
 
 # Optimizers
 optimizer:
-  name: AdamW
+  name: "${optimizer_name}"
   sgd:
     lr: "${lr}"
     momentum: "${momentum}"
@@ -171,9 +173,9 @@ optimizer:
 focal_loss:
     include_background: true
     to_onehot_y: false
-    gamma: 2.
+    gamma: 2
     alpha: null
-    weight: [4, 2, 13, 3, 7, 22, 7, 1, 8, 8, 28, 11, 3, 124]
+    weight: [4, 2, 13, 3, 7, 22, 7, 1, 8, 8, 28, 11, 3, 124]  # [4, 2, 13, 3, 7, 22, 7, 1, 8, 8, 28, 11, 3, 124]
     reduction: mean
     use_softmax: false
 

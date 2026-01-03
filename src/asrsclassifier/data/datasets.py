@@ -67,11 +67,20 @@ class ClsfierDataset(Dataset):
             truncation=True,
             return_token_type_ids=True,
         )
-        item = {
-            "input": {k: torch.tensor(v, dtype=torch.long) for k, v in tokens.items()},
-            "target": torch.tensor(target, dtype=torch.float),
-        }
-        return item
+        if target is not None:
+            return {
+                "acn": torch.tensor([event["acn"]], dtype=torch.long),
+                "input": {
+                    k: torch.tensor(v, dtype=torch.long) for k, v in tokens.items()
+                },
+                "target": torch.tensor(target, dtype=torch.float),
+            }
+        else:
+            return {
+                "input": {
+                    k: torch.tensor(v, dtype=torch.long) for k, v in tokens.items()
+                }
+            }
 
     def _build_decoder_pattern(self) -> "re.Pattern":
         terms = set()
@@ -106,7 +115,9 @@ class ClsfierDataset(Dataset):
             )
         return text
 
-    def _one_hot(self, text: "str"):
+    def _one_hot(self, text: "str | None" = None):
+        if text is None:
+            return text
         num_labels = [0] * len(self.mapper)
         labels = [label.strip().replace(" / ", "/") for label in text.split(";")]
         for label in labels:

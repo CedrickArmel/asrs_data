@@ -21,6 +21,6 @@
 # SOFTWARE.
 
 from .datasets import ClsfierDataset
-from .load_data import get_data, get_decoders
+from .load_data import get_data, get_decoders, load_data
 
-__all__ = ["ClsfierDataset", "get_data", "get_decoders"]
+__all__ = ["ClsfierDataset", "get_data", "get_decoders", "load_data"]

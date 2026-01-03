@@ -23,7 +23,9 @@
 from pathlib import Path
 
 
-def path(path: "str | Path"):
+def path(path: "str | Path | None" = None):
+    if path is None:
+        return path
     project_root = Path(__file__).parents[3].resolve()
     path = Path(path)
     final_path = (project_root / path).resolve() if not path.is_absolute() else path

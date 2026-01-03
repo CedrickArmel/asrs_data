@@ -24,37 +24,56 @@ import json
 from typing import Any, Dict, List, Optional, Tuple
 
 import pandas as pd
+import spacy
+from omegaconf import DictConfig
+from torch.utils.data import DataLoader
+from transformers import AutoTokenizer
+
+from asrsclassifier.utils import get_data_loader
+
+from .datasets import ClsfierDataset
 
 
 def get_data(
-    path: "str", fold: "int | None" = None, mode: "str" = "fit"
+    path: "str",
+    val_path: "str | None" = None,
+    fold: "int" = -1,
+    mode: "str" = "kfold",
 ) -> "Tuple[List[Dict[str, Any]], Optional[List[Dict[str, Any]]]]":
 
-    if mode not in ["fit", "test"]:
-        raise ValueError("mode argument must be one of fit or test!")
+    if mode not in ["kfold", "fit", "test"]:
+        raise ValueError("mode argument must be one of kfold, fit or test!")
 
-    elif mode == "fit":
+    if not isinstance(fold, int) and fold < -1:
+        raise ValueError("`fold` must be an integer >= -1.")
+
+    if fold is None and mode == "kfold":
+        raise ValueError("`fold` must be an provided `mode='kfold'` >= -1.")
+
+    if mode in ["kfold", "fit"]:
         df = pd.read_parquet(path)
-        if isinstance(fold, int) and fold > -1:
+        if mode == "kfold":
             train_data = df.loc[
                 df.fold != fold, ["acn", "narrative", "anomaly"]
             ].to_dict(orient="records")
             val_data = df.loc[df.fold == fold, ["acn", "narrative", "anomaly"]].to_dict(
                 orient="records"
             )
-        else:
-            train_data = df.loc[df.fold != 0, ["acn", "narrative", "anomaly"]].to_dict(
-                orient="records"
-            )
-            val_data = df.loc[df.fold == 0, ["acn", "narrative", "anomaly"]].to_dict(
-                orient="records"
-            )
-        data = (train_data, val_data)
 
-    elif mode == "test":
-        df = pd.read_parquet(path)
-        data = (df.to_dict(orient="records"), None)
-    return data
+        elif mode == "fit":
+            train_data = df[["acn", "narrative", "anomaly"]].to_dict(orient="records")
+            if val_path is not None:
+                df = pd.read_parquet(val_path)
+                val_data = df[["acn", "narrative", "anomaly"]].to_dict(orient="records")
+            else:
+                val_data = None
+
+    else:
+        train_data = None
+        df = pd.read_parquet(val_path)
+        val_data = df[["acn", "narrative", "anomaly"]].to_dict(orient="records")
+
+    return train_data, val_data
 
 
 def get_decoders(mapper_path: "str", decoder_path: "str"):
@@ -63,3 +82,44 @@ def get_decoders(mapper_path: "str", decoder_path: "str"):
     with open(decoder_path, "r") as f:
         decoder = json.load(f)
     return mapper, decoder
+
+
+def load_data(cfg: "DictConfig") -> "Tuple[DataLoader, Optional[DataLoader]]":
+    mapper, decoder = get_decoders(**cfg.data.decoders)
+    tokenizer = AutoTokenizer.from_pretrained(cfg.models.encoder_name, use_fast=True)
+    nlp = spacy.load("en_core_web_sm")
+    train_data, val_data = get_data(**cfg.data.datasets)
+    train_loader = None
+    val_loader = None
+
+    if train_data:
+        train_ds = ClsfierDataset(
+            data=train_data,
+            tokenizer=tokenizer,
+            mapper=mapper,
+            decoder=decoder,
+            lang=nlp,
+            **cfg.data.params,
+        )
+        train_loader = get_data_loader(
+            dataset=train_ds, seed=cfg.determinism.seed, **cfg.loader.train
+        )
+
+    if val_data is not None:
+        bs = cfg.loader.eval.batch_size
+        if (x := len(val_data) % (bs * 8)) != 0:
+            val_data += val_data[
+                -((bs * 8) - x) :
+            ]  # complete de data so that we avoid drop last in data_loader. 8 -> 8 core (4x2 cores, ...)
+        val_ds = ClsfierDataset(
+            data=val_data,
+            tokenizer=tokenizer,
+            mapper=mapper,
+            decoder=decoder,
+            lang=nlp,
+            **cfg.data.params,
+        )
+        val_loader = get_data_loader(
+            dataset=val_ds, seed=cfg.determinism.seed, **cfg.loader.eval
+        )
+    return train_loader, val_loader

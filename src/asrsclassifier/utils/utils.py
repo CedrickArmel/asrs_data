@@ -172,7 +172,8 @@ def get_scheduler(
         raise ValueError(
             f"Invalid schedule type: {name}. Supported types are 'multistep', 'cosine', 'cosine_wr', 'constant', 'none'."
         )
-    args = kwargs[name]
+    if name != "none":
+        args = kwargs[name]
     if name == "multistep":
         steps: "int" = training_steps - warmup
         milestones = range(1, steps, (steps // args.milestones))
@@ -191,15 +192,6 @@ def get_scheduler(
         if warmup > 0:
             warn(
                 "Warmup is set to a value greater than 0, but `none` is provided as schedule type."
-                "Considering only the linear warmup phase. Set `warmup` to 0 to disable it."
-            )
-        scheduler = None
-
-    else:
-        if warmup > 0:
-            warn(
-                "Warmup is set to a value greater than 0, but an unsupported schedule"
-                f"type: {name} is provided by user."
                 "Considering only the linear warmup phase. Set `warmup` to 0 to disable it."
             )
         scheduler = None

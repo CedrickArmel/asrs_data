@@ -29,7 +29,7 @@ from lightning.pytorch.profilers import Profiler
 def get_lightning_trainer(
     logger: "Logger | bool",
     callbacks: "list[Callback] | None",
-    profiler: "Profiler | None",
+    profiler: "Profiler | None" = None,
     **kwargs,
 ) -> "L.Trainer":
     return L.Trainer(logger=logger, callbacks=callbacks, profiler=profiler, **kwargs)
