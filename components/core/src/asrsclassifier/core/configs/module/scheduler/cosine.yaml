@@ -1,0 +1,6 @@
+scheduler:
+  _target_: torch.optim.lr_scheduler.CosineAnnealingLR
+  _partial_: true
+  T_max: ???  # (int) – Maximum number of iterations.
+  eta_min: 0  # (float) – Minimum learning rate.
+  last_epoch: -1  # (int) – The index of the last epoch.

@@ -1,0 +1,7 @@
+load:
+  train_data_path: ${paths.root_dir}/data/03_final/final_safran_asrs_14label_fit_10fold_seed_4294967295_v2.parquet
+  val_data_path: ${paths.root_dir}/data/03_final/final_safran_asrs_14label_test_v2.parquet
+
+dataset:
+  mapper_path: ${paths.root_dir}/data/01_primary/one_hot_mapping.json
+  decoder_path: ${paths.root_dir}/data/01_primary/abs_decoder_domain_specific.json

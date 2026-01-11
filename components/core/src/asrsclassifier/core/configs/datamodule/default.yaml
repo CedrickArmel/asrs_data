@@ -1,0 +1,34 @@
+_target_: asrsclassifier.core.data.ASRSDataModule
+defaults:
+  - data@_here_: safran
+  - base_loader@train_loader
+  - base_loader@eval_loader
+  - _self_
+
+load:
+  _target_: asrsclassifier.core.data.load_data
+  mode: ${task_name}
+  fold: 0
+
+dataset:
+  _target_: asrsclassifier.core.data.ASRSDataset
+  decode: false
+  stopwords: true
+  max_len: 512
+  lang: "en_core_web_sm"
+  tokenizer: ${model.name}
+  num_labels: ${model.num_labels}
+
+train_loader:
+  num_workers: 2
+  shuffle: true
+  drop_last: true
+  prefetch_factor: 2
+
+eval_loader:
+  num_workers: 2
+  shuffle: true
+  drop_last: true
+  prefetch_factor: 2
+
+seed: "${seed}"

@@ -1,0 +1,34 @@
+# @package _global_
+
+defaults:
+  - module: safeaerobert
+  - datamodule: default
+  - trainer
+  - strategy: ddp
+  - loggers: multiple
+  - callbacks: multiple
+  - paths
+  - extras
+  - hydra: default
+  - experiment: null
+  - tuner: optuna
+  - debug: null
+  - profiler: null
+  - _self_
+
+determinism:
+  _target_: asrsclassifier.core.utils.set_seed
+  seed: "${seed}"
+  cudnn_backend: false
+  use_deterministic_algorithms: false
+  warn_only: true
+
+lr: ???
+seed: 4294967295
+task_name: train
+tags: ["dev"]
+train: true
+test: true
+ckpt_path: null
+# initialize(version_base=None, config_path="src/asrsclassifier/core/configs", job_name="test_app")
+# compose(config_name="train")

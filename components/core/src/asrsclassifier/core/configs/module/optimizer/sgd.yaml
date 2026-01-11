@@ -1,0 +1,9 @@
+defaults:
+  - base_optimizer
+  - _self_
+
+optimizer:
+  _target_: torch.optim.SGD
+  momentum: 0
+  dampening: 0
+  nesterov: false

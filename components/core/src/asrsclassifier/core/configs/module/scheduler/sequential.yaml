@@ -1,0 +1,10 @@
+# https://docs.pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.SequentialLR.html
+
+scheduler:
+  _target_: torch.optim.lr_scheduler.SequentialLR
+  _partial_: true
+  schedulers:
+    - cosine
+  milestones:
+    - 1
+  last_epoch: -1

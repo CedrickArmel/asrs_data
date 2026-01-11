@@ -1,0 +1,7 @@
+# https://docs.pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.MultiStepLR.html
+scheduler:
+  _target_: torch.optim.lr_scheduler.MultiStepLR
+  _partial_: true
+  milestones: ??? # (list) – List of epoch indices. Must be increasing.
+  gamma: 0.1  # (float) – Multiplicative factor of learning rate decay.
+  last_epoch: -1  # (int) – The index of last epoch.

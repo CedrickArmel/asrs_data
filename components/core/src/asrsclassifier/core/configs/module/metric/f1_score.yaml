@@ -1,0 +1,19 @@
+# https://lightning.ai/docs/torchmetrics/stable/classification/f1_score.html
+
+metric:
+  _target_: asrsclassifier.core.metrics.F1Score
+  task: "${task}"
+  num_classes: "${num_classes}"
+  num_labels: "${num_labels}"
+  average: "none"
+  multidim_average: "global"
+  top_k: 1
+  ignore_index: null
+  validate_args: true
+  zero_division: 1.0
+  compute_on_cpu: true
+  dist_sync_on_step: false
+  dist_sync_fn: null
+  distributed_available_fn: null
+  sync_on_compute: true
+  compute_with_cache: true
