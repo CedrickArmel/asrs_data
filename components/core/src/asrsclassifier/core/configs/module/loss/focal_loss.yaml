@@ -1,9 +1,11 @@
+# @package module
+
 loss:
   _target_: asrsclassifier.core.loss.FocalLoss
   include_background: true
   to_onehot_y: false
   gamma: 2
   alpha: null
-  weight: [4, 2, 13, 3, 7, 22, 7, 1, 8, 8, 28, 11, 3, 124]
+  weight: null
   reduction: mean
   use_softmax: false

@@ -1,3 +1,7 @@
+# @package module
+
+# https://docs.pytorch.org/docs/stable/generated/torch.optim.SGD.html
+
 defaults:
   - base_optimizer
   - _self_

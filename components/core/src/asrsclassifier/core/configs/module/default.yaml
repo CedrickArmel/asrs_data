@@ -1,0 +1,9 @@
+_target_: asrsclassifier.core.models.ASRSClassifier
+
+encoder:
+  _target_: asrsclassifier.core.models.nets.load_transformer
+  name: "NASA-AIML/MIKA_SafeAeroBERT"
+  num_labels: 14
+
+trainable_layers: { "classifier": null, "bert.encoder.layer": [10, 11] }
+priors: null

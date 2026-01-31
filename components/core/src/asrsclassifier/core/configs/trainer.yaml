@@ -1,28 +1,27 @@
 # https://lightning.ai/docs/pytorch/latest/api/lightning.pytorch.trainer.trainer.Trainer.html
 trainer:
   _target_: lightning.pytorch.trainer.Trainer
-  accelerator: auto  # Supports passing different accelerator types (“cpu”, “gpu”, “tpu”, “hpu”, “mps”, “auto”)
-  devices: auto  # The devices to use. Can be set to a positive number (int or str),
+  accelerator: auto # Supports passing different accelerator types (“cpu”, “gpu”, “tpu”, “hpu”, “mps”, “auto”)
+  devices: auto # The devices to use. Can be set to a positive number (int or str),
   # a sequence of device indices (list or str), the value -1 to indicate all available devices should be used,
   # or "auto" for automatic selection based on the chosen accelerator.
-  num_nodes: 1  # (int) – Number of GPU nodes for distributed training
-  precision: 32-true  # See documentation to see all available precisions on your accelerator.
-  fast_dev_run: false  #  Runs n if set to n (int) else 1 if set to True batch(es) of train, val and test to find any bugs (ie: a sort of unit test). Default: False.
-  max_epochs: 2  # Stop training once this number of epochs is reached.
-  min_epochs: 1  # Force training for at least these many epochs. Prevents early stopping.
-  max_steps: -1  # Stop training after this number of steps. Disabled by default (-1). If max_steps = -1 and max_epochs = None, will default to max_epochs = 1000. To enable infinite training, set max_epochs to -1.
-  min_steps: null  # Force training for at least these number of steps.
-  max_time: null  # Stop training after this amount of time has passed.
-  val_check_interval: null  # How often to check the validation set. See documentation for full overview and specifities.
-  check_val_every_n_epoch: 1  # Perform a validation loop after every N training epochs. If None, validation will be done solely based on the number of training batches, requiring val_check_interval to be an integer value. When used together with a time-based val_check_interval and check_val_every_n_epoch > 1, validation is aligned to epoch multiples: if the interval elapses before the next multiple-N epoch, validation runs at the start of that epoch (after the first batch) and the timer resets; if it elapses during a multiple-N epoch, validation runs after the current batch. For None or 1 cases, the time-based behavior of val_check_interval applies without additional alignment. Default: 1.
-  log_every_n_steps: 2  # How often to log within steps.
-  accumulate_grad_batches: 1  # Accumulates gradients over k batches before stepping the optimizer.
-  gradient_clip_val: 2  # The value at which to clip gradients. Passing gradient_clip_val=None disables gradient clipping. If using Automatic Mixed Precision (AMP), the gradients will be unscaled before. Default: None.
-  gradient_clip_algorithm: norm  # The gradient clipping algorithm to use. Pass gradient_clip_algorithm="value" to clip by value, and gradient_clip_algorithm="norm" to clip by norm. By default it will be set to "norm".
-  deterministic: true  # If True, sets whether PyTorch operations must use deterministic algorithms.
+  num_nodes: 1 # (int) – Number of GPU nodes for distributed training
+  precision: 32-true # See documentation to see all available precisions on your accelerator.
+  fast_dev_run: false #  Runs n if set to n (int) else 1 if set to True batch(es) of train, val and test to find any bugs (ie: a sort of unit test). Default: False.
+  max_epochs: -1 # Stop training once this number of epochs is reached.
+  min_epochs: 1 # Force training for at least these many epochs. Prevents early stopping.
+  max_steps: -1 # Stop training after this number of steps. Disabled by default (-1). If max_steps = -1 and max_epochs = None, will default to max_epochs = 1000. To enable infinite training, set max_epochs to -1.
+  min_steps: null # Force training for at least these number of steps.
+  max_time: null # Stop training after this amount of time has passed.
+  val_check_interval: null # How often to check the validation set. See documentation for full overview and specifities.
+  check_val_every_n_epoch: 1 # Perform a validation loop after every N training epochs. If None, validation will be done solely based on the number of training batches, requiring val_check_interval to be an integer value. When used together with a time-based val_check_interval and check_val_every_n_epoch > 1, validation is aligned to epoch multiples: if the interval elapses before the next multiple-N epoch, validation runs at the start of that epoch (after the first batch) and the timer resets; if it elapses during a multiple-N epoch, validation runs after the current batch. For None or 1 cases, the time-based behavior of val_check_interval applies without additional alignment. Default: 1.
+  log_every_n_steps: 2 # How often to log within steps.
+  accumulate_grad_batches: 1 # Accumulates gradients over k batches before stepping the optimizer.
+  gradient_clip_val: 2 # The value at which to clip gradients. Passing gradient_clip_val=None disables gradient clipping. If using Automatic Mixed Precision (AMP), the gradients will be unscaled before. Default: None.
+  gradient_clip_algorithm: norm # The gradient clipping algorithm to use. Pass gradient_clip_algorithm="value" to clip by value, and gradient_clip_algorithm="norm" to clip by norm. By default it will be set to "norm".
+  deterministic: true # If True, sets whether PyTorch operations must use deterministic algorithms.
   # Set to "warn" to use deterministic algorithms whenever possible, throwing warnings on operations that don’t support deterministic mode.
   # If not set, defaults to False. makes training slower but gives more reproducibility than just setting seeds
-
-  sync_batchnorm: false  # Synchronize batch norm layers between process groups/whole world.
+  sync_batchnorm: false # Synchronize batch norm layers between process groups/whole world.
   # model_registr: null  # The name of the model being uploaded to Model hub.
   default_root_dir: ${paths.output_dir}

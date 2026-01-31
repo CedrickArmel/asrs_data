@@ -1,0 +1,12 @@
+# @package module
+
+# https://docs.pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.LinearLR.html
+scheduler:
+  _target_: asrsclassifier.core.utils.instantiate_scheduler
+  scheduler_cfg:
+    _target_: torch.optim.lr_scheduler.LinearLR
+    _partial_: true
+    start_factor: 1e-6
+    end_factor: 1.
+    total_iters: 200
+    last_epoch: -1 # (int) – The index of last epoch.

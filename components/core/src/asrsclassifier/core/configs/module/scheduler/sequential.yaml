@@ -1,10 +1,12 @@
+# @package module
+
 # https://docs.pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.SequentialLR.html
 
 scheduler:
-  _target_: torch.optim.lr_scheduler.SequentialLR
-  _partial_: true
-  schedulers:
-    - cosine
-  milestones:
-    - 1
-  last_epoch: -1
+  _target_: asrsclassifier.core.utils.instantiate_scheduler
+  scheduler_cfg:
+    _target_: torch.optim.lr_scheduler.SequentialLR
+    _partial_: true
+    schedulers: ??
+    milestones: ??
+    last_epoch: -1

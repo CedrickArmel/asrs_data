@@ -1,6 +1,0 @@
-# https://docs.pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.LambdaLR.html
-scheduler:
-  _target_: torch.optim.lr_scheduler.LambdaLR
-  _partial_: true
-  lr_lambda: ??? # (function or list) – A function which computes a multiplicative factor given an integer parameter epoch, or a list of such functions, one for each group in optimizer.param_groups.
-  last_epoch: -1  # (int) – The index of last epoch.

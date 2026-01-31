@@ -2,17 +2,37 @@
 
 defaults:
   - _self_
-  - data: mnist # choose datamodule with `test_dataloader()` for evaluation
-  - model: mnist
-  - logger: null
-  - trainer: default
-  - paths: default
-  - extras: default
+  - module: default
+  - module/loss: focal_loss
+  - module/scheduler: sequential
+  - module/metric: null
+  - module/optimizer: adam
+  - datamodule
+  - decoder
+  - mapper
+  - trainer
+  - strategy: auto
+  - loggers: multiple
+  - callbacks: multiple
+  - paths
+  - extras
   - hydra: default
+  - experiment: safran
+  - tuner: null
+  - debug: null
+  - profiler: null
+  - _self_
 
-task_name: "eval"
+determinism:
+  _target_: asrsclassifier.core.utils.set_seed
+  seed: ${seed}
+  cudnn_backend: false
+  use_deterministic_algorithms: false
+  warn_only: true
 
+optimized_metric: score
+seed: 4294967295
+stage: eval
 tags: ["dev"]
 
-# passing checkpoint path is necessary for evaluation
 ckpt_path: ???

@@ -1,0 +1,37 @@
+datamodule:
+  _target_: asrsclassifier.core.data.ASRSDataModule
+
+  load:
+    _target_: asrsclassifier.core.data.load_data
+    mode: ${stage}
+    fold: 0
+
+  dataset:
+    _target_: asrsclassifier.core.data.ASRSDataset
+    decode: false
+    stopwords: true
+    max_len: 512
+    lang: "en_core_web_sm"
+    tokenizer: ${module.encoder.name}
+
+  train_loader:
+    _target_: torch.utils.data.DataLoader
+    batch_size: 25
+    persistent_workers: true
+    pin_memory: false
+    num_workers: 2
+    shuffle: true
+    drop_last: true
+    prefetch_factor: 2
+
+  eval_loader:
+    _target_: torch.utils.data.DataLoader
+    batch_size: 25
+    persistent_workers: true
+    pin_memory: false
+    num_workers: 2
+    shuffle: true
+    drop_last: true
+    prefetch_factor: 2
+
+  seed: "${seed}"

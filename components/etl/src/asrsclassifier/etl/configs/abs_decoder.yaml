@@ -1,4 +1,5 @@
-{
+decoder:
+  {
     "ACARS": "Automatic Communications Addressing & Reporting System",
     "ACFT": "Aircraft",
     "ACR": "Air Carrier",
@@ -504,5 +505,5 @@
     "XMITTING": "Transmiting",
     "XPONDER": "Transponder",
     "XWIND": "Crosswind",
-    "sUAS": "Small Unmanned Aircraft System"
-}
+    "sUAS": "Small Unmanned Aircraft System",
+  }

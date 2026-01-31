@@ -1,31 +1,37 @@
 # @package _global_
 
 defaults:
-  - module: safeaerobert
-  - datamodule: default
+  - module: default
+  - module/loss: focal_loss
+  - module/scheduler: sequential
+  - module/metric: null
+  - module/optimizer: adam
+  - datamodule
+  - abs_decoder
+  - mapper
   - trainer
-  - strategy: ddp
+  - strategy: auto
   - loggers: multiple
   - callbacks: multiple
   - paths
   - extras
   - hydra: default
-  - experiment: null
-  - tuner: optuna
+  - experiment: base
+  - tuner: null
   - debug: null
   - profiler: null
   - _self_
 
 determinism:
   _target_: asrsclassifier.core.utils.set_seed
-  seed: "${seed}"
+  seed: ${seed}
   cudnn_backend: false
   use_deterministic_algorithms: false
   warn_only: true
 
-lr: ???
+optimized_metric: score
 seed: 4294967295
-task_name: train
+stage: train # train, eval
 tags: ["dev"]
 train: true
 test: true

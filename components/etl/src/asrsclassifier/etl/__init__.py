@@ -19,18 +19,3 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
-from pathlib import Path
-
-
-def path(path: "str | Path | None" = None):
-    if path is None:
-        return path
-    project_root = Path(__file__).parents[3].resolve()
-    path = Path(path)
-    final_path = (project_root / path).resolve() if not path.is_absolute() else path
-    return str(final_path)
-
-
-def wandbgroup(name: "str"):
-    return name.lower().replace("/", "").replace("-", "").replace("_", "")[-20:]

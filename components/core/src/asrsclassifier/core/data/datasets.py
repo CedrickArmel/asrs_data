@@ -25,10 +25,9 @@ from typing import Any
 
 import spacy
 import torch
+from omegaconf import OmegaConf
 from torch.utils.data import Dataset
 from transformers import AutoTokenizer
-
-from .utils import get_decoders
 
 
 class ASRSDataset(Dataset):
@@ -38,19 +37,18 @@ class ASRSDataset(Dataset):
         self,
         data: list[dict[str, str]],
         max_len: int,
-        decoder_path: str,
+        decoder: str,
         lang: str,
         tokenizer: str,
-        mapper_path: str,
+        mapper: str,
         decode: "bool" = True,
         stopwords: "bool" = False,
     ) -> None:
 
         self.data = data
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer, use_fast=True)
-        self.mapper, self.decoder = get_decoders(
-            mapper_path=mapper_path, decoder_path=decoder_path
-        )
+        self.mapper: dict[str, int] = OmegaConf.to_container(mapper, throw_on_missing=True)  # type: ignore[assignment]
+        self.decoder: dict[str, str] = OmegaConf.to_container(decoder, throw_on_missing=True)  # type: ignore[assignment]
         self.lang = spacy.load(lang)
         self.decode = decode
         self.stopwords = stopwords

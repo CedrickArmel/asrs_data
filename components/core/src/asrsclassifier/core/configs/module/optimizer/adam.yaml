@@ -1,3 +1,5 @@
+# @package module
+
 defaults:
   - base_optimizer
   - _self_

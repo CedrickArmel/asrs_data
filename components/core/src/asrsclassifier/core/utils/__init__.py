@@ -20,6 +20,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from .instantiators import (
+    instantiate_callbacks,
+    instantiate_loggers,
+    instantiate_scheduler,
+)
+from .logging_utils import log_hyperparameters
 from .pylogger import RankedLogger
 from .rich_utils import enforce_tags, print_config_tree
 from .utils import (
@@ -29,6 +35,7 @@ from .utils import (
     get_metric_value,
     get_seeded_generator,
     seed_worker,
+    set_seed,
     task_wrapper,
 )
 
@@ -42,5 +49,10 @@ __all__ = [
     "task_wrapper",
     "get_metric_value",
     "print_config_tree",
+    "instantiate_callbacks",
+    "instantiate_loggers",
+    "instantiate_scheduler",
+    "log_hyperparameters",
     "enforce_tags",
+    "set_seed",
 ]

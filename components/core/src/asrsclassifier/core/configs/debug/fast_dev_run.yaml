@@ -6,4 +6,7 @@ defaults:
   - default
 
 trainer:
-  fast_dev_run: true
+  fast_dev_run: true # Runs n if set to n (int) else 1 if set to True batch(es) of train, val and test to find any bugs (ie: a sort of unit test).
+
+callbacks: null
+logger: null

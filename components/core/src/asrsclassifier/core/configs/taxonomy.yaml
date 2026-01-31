@@ -1,40 +1,34 @@
-{
-    "Aircraft Equipment": [
-        "Critical",
-        "Less Severe"
-    ],
-    "Airspace Violation": [
-        "All Types"
-    ],
-    "ATC Issues": [
-        "All Types"
-    ],
-    "Flight Deck/Cabin/Aircraft Event": [
+taxonomy:
+  {
+    "Aircraft Equipment": ["Critical", "Less Severe"],
+    "Airspace Violation": ["All Types"],
+    "ATC Issues": ["All Types"],
+    "Flight Deck/Cabin/Aircraft Event":
+      [
         "Illness / Injury",
         "Passenger Electronic Device",
         "Passenger Misconduct",
         "Smoke / Fire / Fumes / Odor",
-        "Other / Unknown"
-    ],
-    "Conflict": [
+        "Other / Unknown",
+      ],
+    "Conflict":
+      [
         "NMAC",
         "Airborne Conflict",
         "Ground Conflict, Critical",
-        "Ground Conflict, Less Severe"
-    ],
-    "Deviation - Altitude": [
+        "Ground Conflict, Less Severe",
+      ],
+    "Deviation - Altitude":
+      [
         "Crossing Restriction Not Met",
         "Excursion from Assigned Altitude",
         "Overshoot",
-        "Undershoot"
-    ],
-    "Deviation - Speed": [
-        "All Types"
-    ],
-    "Deviation - Track/Heading": [
-        "All Types"
-    ],
-    "Deviation / Discrepancy - Procedural": [
+        "Undershoot",
+      ],
+    "Deviation - Speed": ["All Types"],
+    "Deviation - Track/Heading": ["All Types"],
+    "Deviation / Discrepancy - Procedural":
+      [
         "Clearance",
         "FAR",
         "Hazardous Material Violation",
@@ -45,19 +39,12 @@
         "Security",
         "Unauthorized Flight Operations (UAS)",
         "Weight and Balance",
-        "Other / Unknown"
-    ],
-    "Ground Excursion": [
-        "Ramp",
-        "Runway",
-        "Taxiway"
-    ],
-    "Ground Incursion": [
-        "Ramp",
-        "Runway",
-        "Taxiway"
-    ],
-    "Ground Event/Encounter": [
+        "Other / Unknown",
+      ],
+    "Ground Excursion": ["Ramp", "Runway", "Taxiway"],
+    "Ground Incursion": ["Ramp", "Runway", "Taxiway"],
+    "Ground Event/Encounter":
+      [
         "Aircraft",
         "FOD",
         "Fuel Issue",
@@ -71,9 +58,10 @@
         "Person / Animal / Bird",
         "Vehicle",
         "Weather / Turbulence",
-        "Other / Unknown"
-    ],
-    "Inflight Event/Encounter": [
+        "Other / Unknown",
+      ],
+    "Inflight Event/Encounter":
+      [
         "Aircraft",
         "CFTT/CFIT",
         "Fly Away (UAS)",
@@ -86,13 +74,8 @@
         "VFR in IMC",
         "Wake Vortex Encounter",
         "Weather / Turbulence",
-        "Other / Unknown"
-    ],
-    "No Specific Anomaly Occurred": [
-        "All Types",
-        "Unwanted Situation"
-    ],
-    "Other": [
-        "Write-in"
-    ]
-}
+        "Other / Unknown",
+      ],
+    "No Specific Anomaly Occurred": ["All Types", "Unwanted Situation"],
+    "Other": ["Write-in"],
+  }

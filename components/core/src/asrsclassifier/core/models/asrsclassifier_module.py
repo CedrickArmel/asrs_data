@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 import os
+from functools import partial
 from typing import Any
 
 import lightning.pytorch as L
@@ -40,9 +41,10 @@ class ASRSClassifier(L.LightningModule):
         net: Module,
         loss: Module,
         metric: Metric,
-        optimizer: Optimizer,
-        scheduler: LRScheduler,
+        optimizer: partial[Optimizer],
+        scheduler: partial[LRScheduler],
         trainable_layers: dict[str, list],
+        priors: list[float] | None,
     ) -> None:
         super().__init__()
         self.net = net
@@ -51,9 +53,10 @@ class ASRSClassifier(L.LightningModule):
         self.trainable_layers = trainable_layers
         self.partial_metric = metric
         self.partial_scheduler = scheduler
+        self.priors = torch.tensor(priors) if priors is not None else priors
 
     def forward(self, inputs: dict[str, torch.Tensor]) -> torch.Tensor:
-        """Perform a forward pass through the model `self.backbone`."""
+        """Perform a forward pass through the model `self.net`."""
         return self.net(**inputs)
 
     def set_trainable(self):
@@ -61,7 +64,7 @@ class ASRSClassifier(L.LightningModule):
             for path, indices in self.trainable_layers.items():
                 try:
                     parts = path.split(".")
-                    submodule = self.backbone
+                    submodule = self.trainer.model.net
                     for part in parts:
                         submodule = getattr(submodule, part)
                     if indices is None:
@@ -72,10 +75,10 @@ class ASRSClassifier(L.LightningModule):
                 except (AttributeError, IndexError, TypeError) as e:
                     print(f"[Warning] Failed to set layer '{path}': {e}")
 
-    def configure_optimizers(self) -> "dict[str, Any] | Optimizer":
+    def configure_optimizers(self) -> "dict[str, Any] | Optimizer":  # type: ignore[override]
         """Return the optimizer and an optionnal lr_scheduler"""
         optimizer: Optimizer = self.partial_optimizer(
-            params=self.trainer.model.parameters()
+            params=self.trainer.model.parameters()  # type: ignore[union-attr]
         )
         scheduler: LRScheduler = self.partial_scheduler(optimizer=optimizer)
         return (
@@ -136,12 +139,15 @@ class ASRSClassifier(L.LightningModule):
         """Called at the beginning of each stage in oder to build model dynamically."""
         if stage == "fit":
             if self.trainable_layers is not None:
-                self.backbone.apply(
+                self.trainer.model.apply(  # type: ignore[union-attr]
                     lambda layer: self._set_layer_trainable(
                         layer=layer, trainable=False
                     )
                 )
                 self.set_trainable()
+                if self.priors is not None:
+                    with torch.no_grad():
+                        self.trainer.model.net.classifier.bias.copy_(-torch.log(self.priors))  # type: ignore[union-attr, operator]
 
     def on_fit_start(self) -> "None":
         """Called at the very beginning of fit."""
@@ -187,7 +193,7 @@ class ASRSClassifier(L.LightningModule):
     def test_step(self, batch: "dict[str, Any]", batch_idx: "int"):
         loss, logits = self._shared_eval_step(batch)
         self.output.append(
-            torch.cat(
+            torch.cat(  # type: ignore[call-overload]
                 [batch["acn"].cpu(), logits.sigmoid().cpu(), batch["target"].cpu()],
                 axis=1,
             )
@@ -249,7 +255,7 @@ class ASRSClassifier(L.LightningModule):
         torch.save(
             output,
             os.path.join(
-                self.trainer.log_dir, f"preds-rank{self.trainer.global_rank}.pt"
+                self.trainer.log_dir, f"preds-rank{self.trainer.global_rank}.pt"  # type: ignore[arg-type]
             ),
         )
 
@@ -279,7 +285,7 @@ class ASRSClassifier(L.LightningModule):
             outputs["logits"] = logits
         return outputs
 
-    def _set_layer_trainable(self, layer: "torch.nn.Layer", trainable: "bool" = False):
+    def _set_layer_trainable(self, layer: torch.nn.Module, trainable: bool = False):
         for param in layer.parameters():
             param.requires_grad = trainable
 

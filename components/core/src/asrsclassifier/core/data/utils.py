@@ -30,8 +30,11 @@ def load_data(
     train_data_path: str | None = None,
     eval_data_path: str | None = None,
     fold: int = -1,
-    mode: str = "kfold",
+    mode: str = "train",
 ) -> Tuple[Optional[List[Dict[str, Any]]], Optional[List[Dict[str, Any]]]]:
+
+    if mode == "debug":
+        mode = "train"
 
     if mode not in ["train", "eval"]:
         raise ValueError("mode argument must be one of train or eval!")
