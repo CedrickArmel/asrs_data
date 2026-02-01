@@ -1,5 +1,5 @@
 [core]
-    remote = data
+    remote = drive
     autostage = true
-['remote "data"']
-    url = gdrive://1x-c_Y-VuUjd6tWxivySBXjCHX_5Q397G
+['remote "drive"']
+    url = 'gdrive://1x-c_Y-VuUjd6tWxivySBXjCHX_5Q397G'

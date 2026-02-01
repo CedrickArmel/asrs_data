@@ -4,7 +4,10 @@ version = "0.1.0"
 description = "NLP project on ASRS DB Online data"
 readme = "README.md"
 requires-python = ">=3.10,<3.11"
-dependencies = ["dvc>=3.66.1"]
+dependencies = [
+    "dvc>=3.66.1",
+    "dvc-gdrive>=3.0.1",
+]
 
 [dependency-groups]
 dev = [
